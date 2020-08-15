@@ -5,3 +5,6 @@ Go to outer folder:
 to build the pkg
 
 the output will be in bin folder: tidb-server
+
+interesting atom based golang ide: https://atom.io/packages/ide-golang
+
