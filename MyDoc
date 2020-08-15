@@ -1,1 +1,7 @@
 go: https://golang.org/doc/install?download=go1.15.darwin-amd64.pkg
+
+Go to outer folder:
+ make
+to build the pkg
+
+the output will be in bin folder: tidb-server
