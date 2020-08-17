@@ -8,3 +8,31 @@ the output will be in bin folder: tidb-server
 
 interesting atom based golang ide: https://atom.io/packages/ide-golang
 
+
+
+
+=========================================================================
+design info:
+
+storage: mvcc as usual, version + key as primary key for kv store
+ - kv stored ordered by key's binary order
+ - RocksDB is used as local kv storage and interact with disk (same as other similiar spanner fans it seems)
+ - kv store is done by sharding, the sharding is based on a range key instead of hashing data to nodes, Each segment is called a Region, Each Region can be described by [StartKey, EndKey)
+ - PD is responsible for gathering data on which region maps to which node
+ - by default all read/writes goes to raft leader!!!!???
+ 
+ 
+ - replication:
+   - raft is used for replication https://docs.pingcap.com/tidb/dev/tidb-storage
+   - raft: https://raft.github.io/raft.pdf
+
+trasntraction:
+1. optimistic concurrent control: write to memory, commit by 2pc
+ - if db and storage are both down, not sure what will happen
+2. pemissitic concurrent control: row level locking, no gap lock, support read committed and repeatedable read
+ - repeatable read: this is following the strategy of timestamp from PD.
+ - as all trnastraction executions start with getting a timestamp from PD, they are ordered as well as all the records, it is not very hard to achieve what should be read
+   and what shouldn't
+
+PD: placement driver
+ - this is critical as it is used to gather the timestamp. this must be availiable across all failures otherwise the system doesn't work at all.
