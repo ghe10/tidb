@@ -79,3 +79,7 @@ https://docs.yugabyte.com/latest/architecture/transactions/transactional-io-path
 
 It has a special tablet to store the records of trans info, and the trasn info is replicated via raft, (might have single host spot for this tablet raft leader)
  
+
+
+to read:
+https://doc.nuodb.com/nuodb/latest/release-notes/
