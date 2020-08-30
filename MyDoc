@@ -57,3 +57,19 @@ cockroachDB: uses  Hybrid-Logical Clocks, no obvious bottle neck on scaling as n
   - this prevents breaking isolation for write as we guarantee writes are not coming from 2 leader at same time.  but not staled read (say 2nd trans have timestamp lower than first trans time - interval)
   = note that we can do this in each range so we don't need to worry about cross range trans, as each range is consistent, and the overall trans aborts if it has partial failure
   
+how to find who is the leader of each group???
+
+yugabyteDB
+ YB-Master Service : metadata, placement etc, usign raft and leader election, serves request like: where is this tablet?
+ YB-TServer Service : storage io
+ tablet <-> range
+ 
+ tablet raft leader choose "hybrid timestamp" for each write: https://docs.yugabyte.com/latest/architecture/transactions/transactions-overview/#hybrid-logical-clocks
+ Hybrid Logical Clock is used again
+ 
+ 
+Seems in storage layer a macheminism is implemented to support transtraction https://docs.yugabyte.com/latest/architecture/transactions/distributed-txns/
+https://docs.yugabyte.com/latest/architecture/transactions/transactional-io-path/
+
+It has a special tablet to store the records of trans info, and the trasn info is replicated via raft, (might have single host spot for this tablet raft leader)
+ 
