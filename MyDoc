@@ -43,4 +43,17 @@ https://pingcap.com/blog/2016-11-09-Deep-Dive-into-TiKV#placement-driver
 
 It seems there is no highly capabily load balanceing logic to use multiple PD server while achieving consistency => which is another distributed transtraction scenario
 
+=================================
+Difference of TIDB, cockroachDB and yugabyteDB on timing part
 
+TIDB: use placement driver to provide incremental timestamp for all transtractions (single point, potential bottle neck especially for cross data ceneter db cluster)
+
+cockroachDB: uses  Hybrid-Logical Clocks, no obvious bottle neck on scaling as no single server, increased retry count as the model requires "Uncertainty Intervals", if other changes is observed in such interval, the transtraction needs rollback, update time stamp and retry
+- potentially higher latency if we have large amount of conflict
+- something is added in "Behavior under Clock Skew" in "CockroachDB: The Resilient Geo-Distributed SQL Database" to gard when it actualy have higher timerskew then we expect
+  - something: an epoch based lease
+      - 1. for each range (raft group), a time stamp range it can serve is added. All the ranges are not overlapping
+      - 2. for each trans touches the range, it stores the leaseholder epoch with the changes, upon commit the epoch is verified, abort is needed if lease holder changed
+  - this prevents breaking isolation for write as we guarantee writes are not coming from 2 leader at same time.  but not staled read (say 2nd trans have timestamp lower than first trans time - interval)
+  = note that we can do this in each range so we don't need to worry about cross range trans, as each range is consistent, and the overall trans aborts if it has partial failure
+  
