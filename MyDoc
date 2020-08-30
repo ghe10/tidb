@@ -56,8 +56,14 @@ cockroachDB: uses  Hybrid-Logical Clocks, no obvious bottle neck on scaling as n
       - 2. for each trans touches the range, it stores the leaseholder epoch with the changes, upon commit the epoch is verified, abort is needed if lease holder changed
   - this prevents breaking isolation for write as we guarantee writes are not coming from 2 leader at same time.  but not staled read (say 2nd trans have timestamp lower than first trans time - interval)
   = note that we can do this in each range so we don't need to worry about cross range trans, as each range is consistent, and the overall trans aborts if it has partial failure
-  
-how to find who is the leader of each group???
+
+In trans handling, a transaction record stored in the range where the first write occurs, lock is created separately in provisional value (write, persist but not committed, in separate rocksDB process)
+https://www.cockroachlabs.com/docs/v20.1/architecture/transaction-layer.html
+The time stamp is chosed by the gateway node
+
+how to find who is the leader of each group?
+"Meta ranges
+The locations of all ranges in your cluster are stored in a two-level index at the beginning of your key-space, known as meta ranges, where the first level (meta1) addresses the second, and the second (meta2) addresses data in the cluster. Importantly, every node has information on where to locate the meta1 range (known as its range descriptor, detailed below), and the range is never split."
 
 yugabyteDB
  YB-Master Service : metadata, placement etc, usign raft and leader election, serves request like: where is this tablet?
