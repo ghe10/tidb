@@ -20,6 +20,7 @@ storage: mvcc as usual, version + key as primary key for kv store
  - kv store is done by sharding, the sharding is based on a range key instead of hashing data to nodes, Each segment is called a Region, Each Region can be described by [StartKey, EndKey)
  - PD is responsible for gathering data on which region maps to which node
  - by default all read/writes goes to raft leader!!!!???
+ - good mvcc start point doc: https://pingcap.com/blog/2016-11-17-mvcc-in-tikv
  
  
  - replication:
@@ -36,3 +37,10 @@ trasntraction:
 
 PD: placement driver
  - this is critical as it is used to gather the timestamp. this must be availiable across all failures otherwise the system doesn't work at all.
+
+“The first issue to be resolved is the single point of failure of PD. Our solution is to start multiple PD servers. These servers elect a Leader through the election mechanism in etcd and the leader provides services to the outside. ”
+https://pingcap.com/blog/2016-11-09-Deep-Dive-into-TiKV#placement-driver
+
+It seems there is no highly capabily load balanceing logic to use multiple PD server while achieving consistency => which is another distributed transtraction scenario
+
+
